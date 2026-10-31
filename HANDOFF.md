@@ -1,48 +1,35 @@
-# 第一关 → 第二关 → 视频的接入约定
+# 开发接入说明
 
-第二关独立入口为本工程 `index.html`。第一关完成后可以同页跳转：
+## 入口与职责
 
-```js
-const next = new URL('../chapter-2/', location.href);
-next.search = new URLSearchParams({from:'museum', relic:'047', seller:'上一关购买记录中的卖方'}).toString();
-location.href = next.href;
-```
+| 文件 | 职责 |
+| --- | --- |
+| src/main.jsx / UnifiedApp.jsx | 首页、全局栏、两幕切换、终章 |
+| src/shared.js | 存档、全局完整度 / 统计 / 证据、统一声音、离线资源解析 |
+| src/Museum.jsx | 第一幕的 React 生命周期和存档适配 |
+| src/museum-runtime.js / museum-core.js | 第一幕场景、巡逻、遮挡、路径、选择题、修复 |
+| src/Chapter2.jsx | 自动对话、残图调查、实体抽屉、拼图、CG |
+| src/SceneCabinet.jsx / cabinet-geometry.js | 九格抽屉与原房间共用美术坐标 |
+| src/hero.js | 四向帧、完整伤痕状态、动作与脚底锚点 |
+| src/config.js | CG 配置与播放地址校验 |
+| scripts/make-offline.mjs | 构建产物 + 52 项实际运行资源内嵌为单文件 |
 
-也可以把当前工程放在总项目根目录，然后跳到 `./?from=museum&relic=047&seller=某收藏者`。编号和卖方会进入第二关手札；URL 参数会被限制长度并以文本渲染。
+第一幕完成调用 `onComplete(detail)`，detail 为 schemaVersion=1，含 evidence、integrity、gameplaySeconds、stats。`completeMuseum()` 将证据写入同一个 run，随后挂载第二幕。两幕不是 iframe 拼接，不依赖 URL 参数伪造进度。
 
-## 第一关负责交付
+存档键 `guitu-integrated-v1`，设置键后缀 `-settings`。`runId` 防止前一轮组件卸载时覆盖新游戏；场景保存每 700ms 一次，卸载时再保存。内部历史字段 `shatters` 现在仅表示“安全恢复次数”，画面及文案均不表示碎裂。
 
-- relic：已经依据身形确认的博物馆编号。
-- seller：购买记录中找到的上一个收藏者/卖方。
-- 第一关躲避保安、取得档案、回 NPC 拼好资料后的最终跳转。
+`guitu:sound` 同步声音状态，`guitu:overlay` 暂停全局说明层下的游戏。第一幕卸载清理 interval、RAF 和监听器；第二幕清理 RAF、声音和延迟回调。调试观察函数为 `guituSnapshot()`、`guituMuseumSnapshot()`、`guituChapter2Snapshot()`，只有读数据能力。Vite 改动共享模块后验收前应刷新整页，避免开发热替换的旧闭包干扰诊断。
 
-## 第二关负责
+## 动作和房间坐标
 
-- 延续“我想回家”，从旧铜像获得方向。
-- 三片残图的可探索寻找：桌面、旧布、需要按线索辨认的暗格。
-- 回旧铜像交互拼图、指出更早的一站。
-- 信封打开后播放视频；视频结束可前往 `nextStageUrl`。
+第一幕逻辑世界 1280×720，以向右为 +X、向下为 +Y。移动、碰撞、灯光和朝向使用同一坐标。保安根据巡逻方向选择南 / 东 / 北 / 西四行；北行必须显示背面。主角到达调查物件后重新朝向物件中心。
 
-## 影片与下一关
+第二幕逻辑归一化为百分比，背景美术为 1672×941。实体柜体坐标必须继续从 cabinet-geometry.js 读取，不能随意更换背景或独立贴一个柜子。镜头放大时场景、角色、抽屉一起变化；前后遮挡依据角色脚点。
 
-只修改 `public/game.config.json`，不需要改游戏代码：
+主角图集 512×512 单帧，锚点 `(0.5,0.95)`。guard-walk 为 256×256 单帧。不要用 CSS 翻转整张角色来替代正背面，也不要通过 CSS 旋转精灵代替实际朝向图。
 
-```json
-{
- "videoUrl":"media/next-chapter.mp4",
- "nextStageUrl":"../chapter-3/",
- "videoTitle":"来时的路"
-}
-```
+## 维护与打包
 
-发布时请使用同站点相对地址。不要填写某台电脑的 `/Users/...` 或 Windows 盘符路径。
+`npm test`；`npm run build`；`npm run test:sites`；`npm run offline`。离线资源清单在 make-offline.mjs 中显式列出；新增资源必须同步，避免 HTTP 成功而离线缺图。
 
-## 整合与提交
-
-1. 将第一关目录与本工程合并在同一个站点内，保留各自资源的相对路径。
-2. 修改第一关最终按钮，使其跳转到第二关目录。
-3. 放入最终影片，检查本地播放。
-4. 在总仓库根目录构建，并用 GitHub Pages/Actions 发布。
-5. 线下演示从同一仓库 clone 后本地启动。
-
-本包含第二关源码与本关美术。第一关的实际代码、美术和最终视频仍需由对应作者提供后整合。
+未调用发布功能。保留 `.openai`、worker 与 Sites 构建支持。代码和素材已在当前工程中；原始附件及旧版源文件未修改，当前工程外的工作目录保留了整合前副本。

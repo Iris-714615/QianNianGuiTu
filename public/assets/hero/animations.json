@@ -1,0 +1,88 @@
+{
+  "version": 1,
+  "frameSize": 512,
+  "pivot": [
+    0.5,
+    0.95
+  ],
+  "walkRows": [
+    "down",
+    "right",
+    "up",
+    "left"
+  ],
+  "stateColumns": [
+    "down",
+    "left",
+    "up",
+    "right"
+  ],
+  "stateRows": [
+    "idle",
+    "light-scars",
+    "heavy-scars",
+    "investigate"
+  ],
+  "walkFps": 8,
+  "actions": {
+    "idle": {
+      "sheet": "states",
+      "row": 0
+    },
+    "walk": {
+      "sheet": "walk",
+      "frames": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "fps": 8
+    },
+    "slow": {
+      "sheet": "walk",
+      "frames": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "fps": 5
+    },
+    "investigate": {
+      "sheet": "states",
+      "row": 3
+    },
+    "surprised": {
+      "sheet": "events",
+      "row": 0,
+      "column": 0
+    },
+    "think": {
+      "sheet": "events",
+      "row": 0,
+      "column": 1
+    },
+    "discover": {
+      "sheet": "events",
+      "row": 0,
+      "column": 2
+    },
+    "weak": {
+      "sheet": "events",
+      "row": 0,
+      "column": 3
+    },
+    "repair": {
+      "from": "heavy-scars",
+      "to": "idle",
+      "duration": 0.8,
+      "effect": "warm-light"
+    },
+    "exhausted": {
+      "sheet": "events",
+      "row": 0,
+      "column": 3
+    }
+  }
+}

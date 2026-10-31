@@ -1,0 +1,112 @@
+{
+  "method": "Actual UI inputs; fresh run, no injected progression; persisted data after ending",
+  "result": {
+    "version": 1,
+    "runId": "mvw70hlf-n7xs2i82l4",
+    "chapter": "ending",
+    "integrity": 3,
+    "museum": {
+      "mode": "ending",
+      "player": {
+        "x": 242.00000428344563,
+        "y": 252.38996326046356,
+        "r": 14,
+        "facing": "left"
+      },
+      "talked": true,
+      "identity": true,
+      "record": true,
+      "letter": true,
+      "solved": true,
+      "level": 2,
+      "elapsed": 56.79319999980917,
+      "exposure": 0,
+      "catches": 0,
+      "wrong": 0,
+      "guard": {
+        "x": 820,
+        "y": 344.0999999999991,
+        "next": 0,
+        "angle": -1.5707963267948966,
+        "speed": 78,
+        "wait": 0,
+        "range": 245,
+        "halfAngle": 0.56
+      },
+      "near": "guide",
+      "steps": 802,
+      "integrity": 3,
+      "damageCount": 0,
+      "shatters": 0,
+      "damageEffect": {
+        "kind": "repair",
+        "started": 647632.2000000477
+      },
+      "checkpoint": null,
+      "handoff": {
+        "schemaVersion": 1,
+        "fromScene": "museum",
+        "nextScene": "antique-dealer",
+        "integrity": 3,
+        "evidence": {
+          "identity": "33-670",
+          "purchaseYear": 1933,
+          "letterDate": "1933-07-10",
+          "dealer": "Otto Burchard",
+          "city": "Beijing"
+        },
+        "memory": [
+          "purchase-year",
+          "previous-owner"
+        ],
+        "gameplaySeconds": 56.79,
+        "stats": {
+          "wrong": 0,
+          "catches": 0,
+          "shatters": 0
+        }
+      },
+      "walking": false
+    },
+    "chapter2": {
+      "mode": "end",
+      "collected": [
+        0,
+        1,
+        2
+      ],
+      "solved": true,
+      "injuries": 0,
+      "order": [
+        0,
+        1,
+        2
+      ],
+      "cloth": true,
+      "introDone": true,
+      "player": {
+        "x": 25,
+        "y": 47,
+        "dir": -1,
+        "facing": "left"
+      }
+    },
+    "evidence": {
+      "identity": "33-670",
+      "purchaseYear": 1933,
+      "letterDate": "1933-07-10",
+      "dealer": "Otto Burchard",
+      "city": "Beijing"
+    },
+    "stats": {
+      "wrong": 0,
+      "catches": 0,
+      "shatters": 0,
+      "bumps": 0
+    },
+    "gameplaySeconds": 170.27119999976009,
+    "museumSeconds": 56.79319999980917,
+    "chapter2Seconds": 113.47799999995092,
+    "finished": true
+  }
+}

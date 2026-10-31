@@ -1,6 +1,6 @@
 {
-  "name": "millennium-home",
-  "version": "0.0.0",
+  "name": "guitu-integrated",
+  "version": "1.0.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -8,7 +8,8 @@
     "build": "vite build && node scripts/prepare-sites-build.mjs",
     "preview": "vite preview",
     "test:sites": "node --test tests/sites-worker.test.mjs",
-    "test": "node --test tests/game/*.test.mjs"
+    "test": "node --test tests/game/*.test.mjs",
+    "offline": "node scripts/make-offline.mjs"
   },
   "dependencies": {
     "@vitejs/plugin-react": "5.0.4",

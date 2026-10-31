@@ -1,0 +1,30 @@
+{
+  "mode": "play",
+  "player": {
+    "x": 680,
+    "y": 420
+  },
+  "near": null,
+  "interaction": null,
+  "talked": true,
+  "identity": true,
+  "record": true,
+  "letter": false,
+  "solved": false,
+  "level": 2,
+  "integrity": 2,
+  "speed": 215,
+  "damageCount": 1,
+  "shatters": 0,
+  "checkpoint": null,
+  "elapsed": 42.29,
+  "catches": 1,
+  "wrong": 0,
+  "exposure": 0,
+  "guard": {
+    "x": 1130,
+    "y": 250,
+    "angle": 1.571
+  },
+  "inSight": false
+}
