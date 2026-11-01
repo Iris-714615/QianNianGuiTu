@@ -1,0 +1,14 @@
+{
+  "cgMuted": {
+    "result": {
+      "type": "string",
+      "value": "{\"time\":0.576082,\"duration\":46.880998,\"paused\":false,\"muted\":false,\"ready\":4}"
+    }
+  },
+  "cgPaused": {
+    "result": {
+      "type": "string",
+      "value": "{\"time\":1.368501,\"paused\":true,\"muted\":true}"
+    }
+  }
+}

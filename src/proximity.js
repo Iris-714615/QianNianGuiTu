@@ -6,7 +6,7 @@ export class ProximityDirector {
   const candidates=[];
   for(const p of points){const d=Math.hypot((p.ax??p.x)-player.x,(p.ay??p.y)-player.y),k=String(p.id);
    if(d>15){this.entries.delete(k);continue}
-   if(d>10)continue;
+   if(d>(typeof p.id==='number'?3:10))continue;
    if(!this.entries.has(k))this.entries.set(k,{since:now,phase,fired:false});
    const entry=this.entries.get(k);
    if(entry.phase!==phase){entry.phase=phase;entry.since=now;entry.fired=false}

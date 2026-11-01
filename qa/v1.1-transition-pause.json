@@ -1,0 +1,14 @@
+{
+  "before": {
+    "result": {
+      "type": "string",
+      "value": "{\"mode\":\"transition\",\"player\":{\"x\":242,\"y\":252.4},\"near\":\"guide\",\"interaction\":{\"id\":\"guide\",\"point\":{\"x\":215,\"y\":252.38996326046356},\"distance\":27.000004283445634},\"talked\":true,\"identity\":true,\"record\":true,\"letter\":true,\"solved\":true,\"level\":2,\"integrity\":3,\"speed\":215,\"damageCount\":0,\"shatters\":0,\"checkpoint\":null,\"elapsed\":77.32,\"catches\":0,\"wrong\":0,\"exposure\":0,\"guard\":{\"x\":820,\"y\":250,\"angle\":0},\"inSight\":false}"
+    }
+  },
+  "after": {
+    "result": {
+      "type": "string",
+      "value": "{\"mode\":\"transition\",\"player\":{\"x\":242,\"y\":252.4},\"near\":\"guide\",\"interaction\":{\"id\":\"guide\",\"point\":{\"x\":215,\"y\":252.38996326046356},\"distance\":27.000004283445634},\"talked\":true,\"identity\":true,\"record\":true,\"letter\":true,\"solved\":true,\"level\":2,\"integrity\":3,\"speed\":215,\"damageCount\":0,\"shatters\":0,\"checkpoint\":null,\"elapsed\":77.32,\"catches\":0,\"wrong\":0,\"exposure\":0,\"guard\":{\"x\":820,\"y\":250,\"angle\":0},\"inSight\":false}"
+    }
+  }
+}

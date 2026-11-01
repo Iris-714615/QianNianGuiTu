@@ -1,0 +1,6 @@
+{
+  "result": {
+    "type": "string",
+    "value": "{\"mode\":\"play\",\"player\":{\"x\":20,\"y\":69.9014888888893,\"dir\":-1,\"facing\":\"down\"},\"collected\":[],\"integrity\":3,\"exhausted\":false,\"solved\":false,\"investigate\":null,\"order\":[2,0,1],\"elapsed\":62.034000000001605,\"route\":0,\"near\":null}"
+  }
+}

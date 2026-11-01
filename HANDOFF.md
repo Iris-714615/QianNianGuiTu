@@ -33,3 +33,17 @@
 `npm test`；`npm run build`；`npm run test:sites`；`npm run offline`。离线资源清单在 make-offline.mjs 中显式列出；新增资源必须同步，避免 HTTP 成功而离线缺图。
 
 未调用发布功能。保留 `.openai`、worker 与 Sites 构建支持。代码和素材已在当前工程中；原始附件及旧版源文件未修改，当前工程外的工作目录保留了整合前副本。
+
+## v1.1 生命周期修订
+
+新增 journey-state.js：根据已完成线索恢复状态，transitionRemaining 以秒保存，说明 / 后台时不消耗。旧版 solved=true 且 mode=play 的存档会恢复转场。activeFrameSeconds 排除超过 1 秒的单帧冻结间隔，不排除正常渲染中的等待。
+
+shared.overlayState 保存全局说明状态，避免场景挂载漏掉事件；第二幕外部说明状态与本地帮助分离。输入先判顶层弹窗，按钮 Enter / Space 使用原生行为。页面 pagehide 时保存；已拼合存档直接恢复信封，本地 Blob 仍须重新选取。包版本 1.1.0，存档版本仍为 1。
+
+## v1.2 空间与 CG
+
+room-depth.js 是第二幕物件地面占位、轮廓、遮挡深度、房间像素比例和对白避让的共同来源。navigation.js 引用其物件占位；RoomDepth.jsx 从原背景中重绘被遮挡的同坐标实体，柜体仍由 SceneCabinet.jsx 管理。脚点控制是否盖住角色。不要用层级置顶人物去掩盖碰撞或遮挡问题。
+
+移动速度使用房间高度为单位，X 除以 roomAspect；手动 / 点击调查距离同样以approach点为准。点击寻路尚未到达时禁止环境触发器抢先截停。
+
+shared.videoAssetUrl 只对内嵌视频分块解码，缓存 Blob URL；影片53项清单包含 ending.mp4。game.config 的 videoAsset 优先于 videoUrl。guitu:film 同步全局声音面板；播放 CG 时不启动 BGM。CG 网页版与原片同为1080p / 30fps / 46.881秒，AAC流复制。

@@ -1,0 +1,15 @@
+{
+  "before": {
+    "result": {
+      "type": "string",
+      "value": "{\"paused\":true,\"time\":0,\"mode\":\"film\"}"
+    }
+  },
+  "after": {
+    "result": {
+      "type": "string",
+      "value": "{\"paused\":true,\"time\":0,\"mode\":\"film\"}"
+    }
+  },
+  "autoEnding": true
+}

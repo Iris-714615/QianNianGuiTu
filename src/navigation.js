@@ -1,10 +1,7 @@
-export const bounds={minX:8,maxX:93,minY:29,maxY:87};
-export const obstacles=[
- {x:7,y:58,w:20,h:28}, {x:8,y:8,w:32,h:22},
- {x:44,y:12,w:22,h:21}, {x:76,y:61,w:19,h:23},
- {x:10,y:30,w:9,h:24}, {x:84,y:8,w:12,h:27}
-];
-export function canWalk(x,y){return x>=bounds.minX&&x<=bounds.maxX&&y>=bounds.minY&&y<=bounds.maxY&&!obstacles.some(b=>x>b.x-1&&x<b.x+b.w+1&&y>b.y-1&&y<b.y+b.h+1)}
+import {roomObjects,insideFloor,overlapsFoot} from './room-depth.js';
+export const bounds={minX:8,maxX:93,minY:29,maxY:85.2};
+export const obstacles=roomObjects.filter(o=>o.foot).map(o=>o.foot);
+export function canWalk(x,y){return insideFloor(x,y)&&!obstacles.some(r=>overlapsFoot(x,y,r))}
 export function nearestWalkable(p){if(canWalk(p.x,p.y))return p;let best=null,d=Infinity;for(let x=8;x<=92;x+=2)for(let y=30;y<=86;y+=2)if(canWalk(x,y)){const n=(x-p.x)**2+(y-p.y)**2;if(n<d){d=n;best={x,y}}}return best}
 // Grid A* keeps click-to-walk from silently sticking against packing crates.
 export function findPath(start,end){const from=nearestWalkable(start),to=nearestWalkable(end);if(!from||!to)return[];

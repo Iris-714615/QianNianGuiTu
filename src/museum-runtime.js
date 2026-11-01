@@ -1,8 +1,9 @@
 import {MuseumCore} from './museum-core';
 import {drawHero as paintLion} from './hero';
-import {assetUrl,sound} from './shared';
+import {assetUrl,sound,overlayState} from './shared';
+import {resumeMuseumState,advanceMuseumTransition,activeFrameSeconds} from './journey-state';
 export function mountMuseum(root,options){
-let disposed=false,route=[],pendingInspect=false,lastFootstep=0,externalPaused=false;const listeners=[],intervals=[],frames=new Set();
+let disposed=false,route=[],pendingInspect=false,lastFootstep=0,externalPaused=overlayState.active;const listeners=[],intervals=[],frames=new Set();
 const nativeWindow=globalThis.window;
 const window={addEventListener(type,fn,opts){nativeWindow.addEventListener(type,fn,opts);listeners.push([nativeWindow,type,fn,opts]);},museumSnapshot:null,museumHandoff:null};
 const document=new Proxy(globalThis.document,{get(target,key){if(key==='addEventListener')return (type,fn,opts)=>{target.addEventListener(type,fn,opts);listeners.push([target,type,fn,opts])};const value=Reflect.get(target,key);return typeof value==='function'?value.bind(target):value;}});
@@ -11,7 +12,7 @@ const requestAnimationFrame=fn=>{const id=globalThis.requestAnimationFrame(t=>{f
 function saveState(){if(typeof state==='undefined'||!state)return;options.save(JSON.parse(JSON.stringify(state)));}
 const art={};const artFiles={floor:'A07_地面.png',guide:'A05_铜龟.png',board:'facing-board.png',desk:'facing-desk.png',files:'facing-files.png',plinth:'facing-plinth.png',cover:'facing-cover.png',wide:'facing-wide.png',guardWalk:'guard-walk.png'};
 for(const [key,file] of Object.entries(artFiles)){const i=new Image();i.onload=()=>{floorReady=false};i.src=assetUrl('museum/'+file);art[key]=i;}
-function drawArtFixture(f){const img=art[f.kind==='cover'&&f.w>f.h?'wide':f.kind];if(!img?.complete||!img.naturalWidth)return false;const s=project(f.x+f.w/2,f.y+f.h),baseW=f.kind==='board'?f.w+10:f.kind==='guide'?112:f.w*1.12,scale=Math.min(1,(f.kind==='files'?104:165)/(baseW*img.naturalHeight/img.naturalWidth)),w=baseW*scale,h=w*img.naturalHeight/img.naturalWidth;ctx.save();if(fixtureOccludes(f,h*.65))ctx.globalAlpha=.6;ctx.drawImage(img,s.x-w/2,s.y-h,w,h);if(state.mode==='play'&&nearest()===f.id){ctx.strokeStyle='#e9ca82';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(s.x,s.y+1,w*.45,10,0,0,Math.PI*2);ctx.stroke()}ctx.restore();if(['guide','pictures','records','letters'].includes(f.id))plaque(f,f.id==='guide'?'铜龟':f.title,5);return true;}
+function drawArtFixture(f){const img=art[f.kind==='cover'&&f.w>f.h?'wide':f.kind];if(!img?.complete||!img.naturalWidth)return false;const s=project(f.x+f.w/2,f.y+f.h),baseW=f.kind==='board'?f.w+10:f.kind==='guide'?112:f.w*1.12,scale=Math.min(1,(f.kind==='files'?104:165)/(baseW*img.naturalHeight/img.naturalWidth)),w=baseW*scale,h=w*img.naturalHeight/img.naturalWidth;ctx.save();ctx.drawImage(img,s.x-w/2,s.y-h,w,h);if(state.mode==='play'&&nearest()===f.id){ctx.strokeStyle='#e9ca82';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(s.x,s.y+1,w*.45,10,0,0,Math.PI*2);ctx.stroke()}ctx.restore();if(['guide','pictures','records','letters'].includes(f.id))plaque(f,f.id==='guide'?'铜龟':f.title,5);return true;}
 function drawArtGuard(){const g=state.guard,s=project(g.x,g.y),img=art.guardWalk;if(!img?.complete||!img.naturalWidth)return false;const dx=Math.cos(g.angle),dy=Math.sin(g.angle),row=Math.abs(dx)>Math.abs(dy)?(dx>0?1:3):(dy>0?0:2),col=state.mode==='play'&&!externalPaused&&!reducedMotion&&!g.wait?Math.floor(performance.now()/140)%4:0;ellipse(s.x,s.y,16,6,'#020b0d80');ctx.drawImage(img,col*256,row*256,256,256,s.x-49,s.y-94,98,98);return true;}
 function queueWalk(point,inspectOnArrival=false){route=findRoute(state.player,point,obstacles(),bounds);pendingInspect=inspectOnArrival;if(!route.length)toast('这条路被挡住了，换个方向靠近。');}
 function clickWorld(e){if(state.mode!=='play')return;const r=canvas.getBoundingClientRect(),sx=(e.clientX-r.left)/r.width*1280,sy=(e.clientY-r.top)/r.height*720;const y=(sy-190)/.88+160,x=640+(sx-640)/(.91+(y-160)/466*.09);const f=fixtures.find(f=>actions[f.id]&&x>=f.x-10&&x<=f.x+f.w+10&&y>=f.y-100&&y<=f.y+f.h+5);if(f){const candidates=[{x:f.x+f.w/2,y:f.y+f.h+32},{x:f.x-32,y:f.y+f.h/2},{x:f.x+f.w+32,y:f.y+f.h/2}];let paths=candidates.map(p=>findRoute(state.player,p,obstacles(),bounds)).filter(a=>a.length).sort((a,b)=>a.length-b.length);route=paths[0]||[];pendingInspect=true;}else queueWalk({x,y});}
@@ -86,7 +87,7 @@ function drawFixture(f){if(drawArtFixture(f))return;
   const active=state.mode==='play'&&nearest()===f.id;
   const h=f.kind==='files'?68:f.kind==='board'?36:f.kind==='desk'?40:f.kind==='plinth'?35:34;
   const total=(f.kind==='guide'||f.kind==='cover')?h+42:h;
-  ctx.save();if(fixtureOccludes(f,total))ctx.globalAlpha=.58;
+  ctx.save();
   const stone={top:'#939580',front:'#666f63',side:'#404d46',bottom:'#303e39',edge:'#bbc0a080'};
   const wood={top:'#83775b',front:'#595442',side:'#373b32',bottom:'#29332c',edge:'#b5a87780'};
   box(f,h,f.kind==='desk'||f.kind==='files'?wood:stone);
@@ -127,7 +128,7 @@ function drawFixture(f){if(drawArtFixture(f))return;
   if(active)rim({x:f.x-1,y:f.y-1,w:f.w+2,h:f.h+2},total+1,'#e4ce8e',2.5);
   ctx.restore();
 }
-function drawHero(){const p=state.player,s=project(p.x,p.y),e=state.damageEffect,age=e?(performance.now()-e.started)/1000:10;ellipse(s.x,s.y+2,20,7,'#020b0d80');paintLion(ctx,s.x,s.y,92,{direction:p.facing,moving:state.walking&&state.mode==='play',integrity:state.integrity,time:state.steps/60,action:e?.kind==='repair'&&age<.8?'repair':state.mode==='play'?'':'inspect',age,slow:keys.has('shift')});if(e&&age<.8){ctx.save();ctx.globalAlpha=(1-age/.8)*.4;ctx.strokeStyle=e.kind==='repair'?'#f2d49c':'#c88b62';ctx.lineWidth=3;ctx.beginPath();ctx.ellipse(s.x,s.y-40,29+age*20,40+age*15,0,0,Math.PI*2);ctx.stroke();ctx.restore();}}
+function drawHero(){const p=state.player,s=project(p.x,p.y),e=state.damageEffect,age=e?(performance.now()-e.started)/1000:10;ellipse(s.x,s.y+2,20,7,'#020b0d80');paintLion(ctx,s.x,s.y,92,{direction:p.facing,moving:state.walking&&state.mode==='play',integrity:state.integrity,time:state.steps/60,action:e?.kind==='repair'&&age<.8?'repair':['identify','records','letters','letter-read','connect'].includes(state.mode)?'inspect':'',age,slow:keys.has('shift')});if(e&&age<.8){ctx.save();ctx.globalAlpha=(1-age/.8)*.4;ctx.strokeStyle=e.kind==='repair'?'#f2d49c':'#c88b62';ctx.lineWidth=3;ctx.beginPath();ctx.ellipse(s.x,s.y-40,29+age*20,40+age*15,0,0,Math.PI*2);ctx.stroke();ctx.restore();}}
 function drawGuard(){if(drawArtGuard())return;
   const g=state.guard,p=project(g.x,g.y),step=state.mode==='play'&&g.wait===0&&!reducedMotion?Math.sin((g.x+g.y)*.15)*2:0;
   ellipse(p.x+2,p.y+3,19,7,'#020b0d80');ctx.save();ctx.translate(p.x,p.y);
@@ -166,7 +167,7 @@ function draw(){
   vision();
   if(!state.record)box(gate,44,{top:'#8f8a68',front:'#5e6551',side:'#344a40',bottom:'#263e34'});else plane(gate,0,'#cabf8b0b','#a99c6540');
   const layers=fixtures.map(f=>({y:f.y+f.h,draw:()=>drawFixture(f)}));
-  for(const wall of [...walls,{x:48,y:160,w:16,h:466},{x:1216,y:160,w:16,h:466}])for(let y=wall.y;y<wall.y+wall.h;y+=58){const r={x:wall.x,y,w:wall.w,h:Math.min(58,wall.y+wall.h-y)};layers.push({y:y+r.h,draw:()=>{ctx.save();if(fixtureOccludes(r,72))ctx.globalAlpha=.5;wallBlock(r,wall.x===48||wall.x===1216?58:70);ctx.restore();}});}
+  for(const wall of [...walls,{x:48,y:160,w:16,h:466},{x:1216,y:160,w:16,h:466}])for(let y=wall.y;y<wall.y+wall.h;y+=58){const r={x:wall.x,y,w:wall.w,h:Math.min(58,wall.y+wall.h-y)};layers.push({y:y+r.h,draw:()=>{ctx.save();wallBlock(r,wall.x===48||wall.x===1216?58:70);ctx.restore();}});}
   layers.push({y:state.player.y,draw:drawHero});if(state.record)layers.push({y:state.guard.y,draw:drawGuard});layers.sort((a,b)=>a.y-b.y).forEach(l=>l.draw());
   // Lower cutaway wall frames the room while leaving the play space visible.
   for(let x=48;x<1232;x+=96)wallBlock({x,y:626,w:Math.min(96,1232-x),h:14},20);
@@ -211,7 +212,7 @@ const selections={};
 const conditionNames=['力竭 · 在安全处恢复','伤痕加深 · 移速85%','轻微伤痕 · 仍可正常调查','完好 · 自由行动'];
 
 $('intro-art').innerHTML='<img src="'+assetUrl('hero/portrait.png')+'" alt="金色狮子化身">';
-let state, keys = new Set(), lastTick=performance.now(), accumulator=0, toastUntil=0, previousMode='play', transitionUntil=0;
+let state, keys = new Set(), lastTick=performance.now(), accumulator=0, toastUntil=0, previousMode='play';
 
 function newGuard(){return {x:1130,y:250,next:2,angle:Math.PI/2,speed:78,wait:1.2,range:245,halfAngle:.56};}
 function fresh(){return {mode:'intro',player:{x:160,y:555,r:14,facing:'down'},talked:false,identity:false,record:false,letter:false,solved:false,level:1,elapsed:0,exposure:0,catches:0,wrong:0,guard:newGuard(),near:null,steps:0,integrity:3,damageCount:0,shatters:0,damageEffect:null,checkpoint:null,handoff:null};}
@@ -221,7 +222,7 @@ function show(id){root.querySelectorAll('.overlay').forEach(el=>el.hidden=el.id!
 function setMode(mode){state.mode=mode;route=[];show(mode==='play'?null:mode);updateHud();if(['identify','records','letters'].includes(mode))sound.tone(320,.12);saveState();}
 function caption(text){$('caption').textContent=text;}
 function toast(text){$('toast').textContent=text;$('toast').hidden=false;toastUntil=performance.now()+2600;}
-function reset(){state=fresh();Object.keys(selections).forEach(clearSelection);keys.clear();accumulator=0;lastTick=performance.now();transitionUntil=0;$('transition').hidden=true;$('toast').hidden=true;$('city').value='';$('dealer').value='';$('connect-submit').disabled=false;$('interact').disabled=true;$('interact').textContent='靠近柜台任一侧，按 E 调查';caption('夜里，另一座展柜传来了一声轻轻的呼唤。');setMode('intro');}
+function reset(){state=fresh();Object.keys(selections).forEach(clearSelection);keys.clear();accumulator=0;lastTick=performance.now();$('transition').hidden=true;$('toast').hidden=true;$('city').value='';$('dealer').value='';$('connect-submit').disabled=false;$('interact').disabled=true;$('interact').textContent='靠近柜台任一侧，按 E 调查';caption('夜里，另一座展柜传来了一声轻轻的呼唤。');setMode('intro');}
 function updateHud(){
   $('clock').textContent=formatTime(state.elapsed);$('progress').textContent=`${Number(state.record)+Number(state.solved)} / 2`;
   $('chapter').textContent=state.record?'归途 / 博物馆 · 潜行与追溯':'归途 / 博物馆 · 搜证与辨认';
@@ -347,12 +348,14 @@ function connect(){
   if($('city').value!=='beijing'||$('dealer').value!=='burchard'){
     wrongAnswer('connect-feedback','再核对资料中的“所在地”和“交易卖方”，它们与当前馆址、采购经手人不同。');$('connect-submit').disabled=true;return;
   }
-  state.solved=true;state.integrity=3;state.damageEffect={kind:'repair',started:performance.now()};state.mode='transition';show(null);transitionUntil=performance.now()+2800;$('transition').innerHTML='记忆归位，伤痕淡去。<small>完整度已恢复 · 1933年 · 北京 · 古董商Burchard</small>';$('transition').hidden=false;caption('纸上的名字，变成了记忆里的一扇门。');updateHud();
+  state.solved=true;state.integrity=3;state.transitionRemaining=2.8;beginTransition();saveState();
+}
+function beginTransition(){state.damageEffect={kind:'repair',started:performance.now()};state.mode='transition';route=[];show(null);$('transition').innerHTML='记忆归位，伤痕淡去。<small>完整度已恢复 · 1933年 · 北京 · 古董商Burchard</small>';$('transition').hidden=false;caption('纸上的名字，变成了记忆里的一扇门。');updateHud();
 }
 function finish(){state.mode='ending';state.handoff={schemaVersion:1,fromScene:'museum',nextScene:'antique-dealer',integrity:3,evidence:{identity:'33-670',purchaseYear:1933,letterDate:'1933-07-10',dealer:'Otto Burchard',city:'Beijing'},memory:['purchase-year','previous-owner'],gameplaySeconds:+state.elapsed.toFixed(2),stats:{wrong:state.wrong,catches:state.catches,shatters:state.shatters}};saveState();options.onComplete(JSON.parse(JSON.stringify(state.handoff)));$('end-wrong').textContent=state.wrong;$('end-shatters').textContent=state.shatters;$('end-time').textContent=formatTime(state.elapsed);$('end-catches').textContent=state.catches;$('transition').hidden=true;show('ending');updateHud();}
 
 $('start').onclick=beginGame;$('dialogue-next').onclick=()=>{state.talked=true;setMode('play');caption(state.record?'先避开灯光，找到通信，再回来核对。':'先在旧图录认出自己，再用编号查购买记录。');};
-canvas.addEventListener('click',clickWorld);$('interact').onclick=inspect;$('enter-level-two').onclick=()=>{setMode('play');caption('右侧的门开了。看清保安朝向，展柜后面是安全的。');};
+canvas.addEventListener('click',e=>{if(!externalPaused)clickWorld(e)});$('interact').onclick=inspect;$('enter-level-two').onclick=()=>{setMode('play');caption('右侧的门开了。看清保安朝向，展柜后面是安全的。');};
 $('take-letter').onclick=()=>{state.letter=true;setMode('play');caption('资料收好了。现在，带着它回到铜龟身边。');toast('获得对应通信 · 返回左侧安全区');};
 $('connect-submit').onclick=connect;$('city').onchange=$('dealer').onchange=()=>{$('connect-submit').disabled=false;};$('reassemble').onclick=reassemble;$('retry').onclick=retry;$('pause-button').onclick=pause;$('resume').onclick=()=>setMode('play');
 $('restart').onclick=reset;$('restart-pause').onclick=reset;$('notes-button').onclick=openNotes;$('end-notes').onclick=openNotes;$('close-notes').onclick=closeNotes;$('notes-back').onclick=closeNotes;
@@ -366,6 +369,7 @@ window.addEventListener('keydown',e=>{if(externalPaused)return;
 });
 window.addEventListener('keyup',e=>keys.delete(e.key.toLowerCase()));
 window.addEventListener('blur',()=>{keys.clear();pause();});
+window.addEventListener('pagehide',saveState);
 document.addEventListener('visibilitychange',()=>{if(document.hidden){keys.clear();pause();}});
 
 function updateGuard(dt){
@@ -391,10 +395,10 @@ function step(dt){
 }
 function tick(){
   const now=performance.now(),realDt=(now-lastTick)/1000;lastTick=now;
-  if(!externalPaused&&!document.hidden&&['play','dialogue','identify','records','level-one','letters','letter-read','connect','transition'].includes(state.mode))state.elapsed+=realDt;
+  if(!externalPaused&&!document.hidden&&['play','dialogue','identify','records','level-one','letters','letter-read','connect','transition'].includes(state.mode))state.elapsed+=activeFrameSeconds(realDt);
   accumulator+=Math.min(realDt,.25);let count=0;while(accumulator>=1/60&&count++<16){step(1/60);accumulator-=1/60;}
   $('clock').textContent=formatTime(state.elapsed);root.dataset.mode=state.mode;
-  if(transitionUntil&&state.mode==='transition'&&now>=transitionUntil){transitionUntil=0;finish();}
+  if(advanceMuseumTransition(state,activeFrameSeconds(realDt),externalPaused||document.hidden))finish();
   if(!$('toast').hidden&&now>toastUntil)$('toast').hidden=true;
   // Embedded browsers can throttle requestAnimationFrame while still accepting input.
   if(now-lastPaintAt>120)draw();
@@ -406,7 +410,7 @@ window.addEventListener('error',e=>{if(e.message){$('error').hidden=false;$('err
 window.museumSnapshot=()=>({mode:state.mode,player:{x:+state.player.x.toFixed(1),y:+state.player.y.toFixed(1)},near:nearest(),interaction:interactionInfo(),talked:state.talked,identity:state.identity,record:state.record,letter:state.letter,solved:state.solved,level:state.level,integrity:state.integrity,speed:215*C.movementMultiplier(state.integrity),damageCount:state.damageCount,shatters:state.shatters,checkpoint:state.checkpoint?{...state.checkpoint}:null,elapsed:+state.elapsed.toFixed(2),catches:state.catches,wrong:state.wrong,exposure:+state.exposure.toFixed(3),guard:{x:+state.guard.x.toFixed(1),y:+state.guard.y.toFixed(1),angle:+state.guard.angle.toFixed(3)},inSight:C.visible(state.guard,state.player,obstacles())});
 window.museumHandoff=()=>state.handoff?JSON.parse(JSON.stringify(state.handoff)):null;
 reset();
-if(options.initial){state={...fresh(),...options.initial,player:{...options.initial.player},guard:options.initial.guard||newGuard(),damageEffect:null,mode:'play'};if(!state.integrity){state.mode='shattered';$('shattered-reason').textContent='伤痕累累，先回安全处恢复。已获得的证据保留。';}show(state.mode==='play'?null:state.mode);updateHud();}else beginGame();
+if(options.initial){state=resumeMuseumState(options.initial,fresh());if(state.mode==='transition')beginTransition();else if(state.mode==='dialogue')talk();else{if(state.mode==='shattered')$('shattered-reason').textContent='伤痕累累，先回安全处恢复。已获得的证据保留。';show(state.mode==='play'?null:state.mode);if(state.mode==='play')caption('旅程已续上。已收好的证据仍在证据册中。');updateHud();}}else beginGame();
 setInterval(tick,1000/60);setInterval(saveState,700);requestAnimationFrame(render);
 options.observe?.(()=>window.museumSnapshot());
 return ()=>{saveState();disposed=true;intervals.forEach(clearInterval);frames.forEach(cancelAnimationFrame);listeners.forEach(([target,type,fn,opts])=>target.removeEventListener(type,fn,opts));root.replaceChildren();};

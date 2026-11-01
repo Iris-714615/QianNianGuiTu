@@ -1,0 +1,18 @@
+{
+  "source": {
+    "name": "3.mp4",
+    "bytes": 71383704,
+    "sha256": "931c24af6493832cc600f765acd78edf8147aac0cd583096495e1d0ab2ed2888"
+  },
+  "web": {
+    "name": "ending.mp4",
+    "bytes": 23719022,
+    "sha256": "86e865a121c7fdf767e72d691c99d3e9658cb178f5a52f7b1ab6bb3a0cf4bfd3"
+  },
+  "duration": 46.880998,
+  "width": 1920,
+  "height": 1080,
+  "video": "H.264 CRF21 fast",
+  "audio": "AAC stream copied",
+  "storyEdits": false
+}

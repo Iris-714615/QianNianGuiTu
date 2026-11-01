@@ -6,10 +6,10 @@ const reduce=typeof matchMedia!=='undefined'&&matchMedia('(prefers-reduced-motio
 export function heroFrame({direction='down',moving=false,integrity=3,action='',time=0,age=10,slow=false}={}){
  let sheet='states',row=0,col=cols[direction]??0;
  if(integrity===0){sheet='events';row=0;col=3}
- else if(['surprised','think','discover','weak','celebrate'].includes(action)){sheet='events';row=0;col=action==='celebrate'?2:({surprised:0,think:1,discover:2,weak:3}[action])}
+ else if(moving){sheet='walk';row=rows[direction]??0;col=Math.floor(time*(slow?5:8))%4}
+ else if(direction==='down'&&['surprised','think','discover','weak','celebrate'].includes(action)){sheet='events';row=0;col=action==='celebrate'?2:({surprised:0,think:1,discover:2,weak:3}[action])}
  else if(integrity<3&&!moving){row=integrity===2?1:2}
  else if(action==='inspect'){row=3}
- else if(moving){sheet='walk';row=rows[direction]??0;col=Math.floor(time*(slow?5:8))%4}
  return {sheet,row,col};
 }
 export function drawHero(ctx,x,y,size,opts={}){

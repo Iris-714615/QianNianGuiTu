@@ -5,3 +5,9 @@
 @media(max-width:1100px){.museum-host #integrity-cells{gap:3px}.museum-host #integrity-cells i{width:12px;height:6px}.museum-host .integrity-top{gap:6px}.museum-host #integrity{padding:4px 8px;font-size:10px}.chapter2-wrap .objective p{font-size:12px}.chapter2-wrap .objective .eyebrow{font-size:8px}.chapter2-wrap .objective-index{font-size:26px}}
 .chapter2-wrap .stage:has(.local-inspection-layer) .hotspot.near{visibility:hidden}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+
+.room-depth{position:absolute;inset:0;width:100%;height:100%;z-index:4;pointer-events:none;overflow:hidden}.chapter2-wrap .player-layer{z-index:3}.chapter2-wrap .world-scene>canvas{z-index:1}
+
+.chapter2-wrap .player-layer::before{content:"";position:absolute;left:29%;top:92%;width:42%;height:6%;border-radius:50%;background:#020b0d60;filter:blur(1px);pointer-events:none}.chapter2-wrap .player-layer .lion-sprite-canvas{z-index:1}
+
+.chapter2-wrap .cabinet-scene-note{left:8%;top:44%;width:25%;max-width:300px}.chapter2-wrap .is-cabinet-focus .found-clue{display:none}@media(max-width:650px){.chapter2-wrap .is-cabinet-focus .player-layer{width:5.5%!important}.chapter2-wrap .cabinet-scene-note{left:5%;top:66%;bottom:auto;width:30%;max-height:20%;overflow:auto}}
